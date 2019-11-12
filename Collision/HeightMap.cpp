@@ -670,8 +670,8 @@ bool HeightMap::RayTriangle(const XMVECTOR& vert0, const XMVECTOR& vert1, const 
 
 	 // Step 2: Use |COLNORM| and any vertex on the triangle to calculate D
 
-	 float d; //-D in Ax+By+Cz = -D
-	 XMStoreFloat(&d, -XMVector3Dot(colNormN, vert0));
+	 float D; //D in Ax+By+Cz = -D
+	 XMStoreFloat(&D, -XMVector3Dot(colNormN, vert0));
 	 
 	 // Step 3: Calculate the demoninator of the COLDIST equation: (|COLNORM| dot |RAYDIR|) and "early out" (return false) if it is 0
 	 XMVECTOR normalizedRayDir = XMVector3Normalize(rayDir);
@@ -684,7 +684,7 @@ bool HeightMap::RayTriangle(const XMVECTOR& vert0, const XMVECTOR& vert1, const 
 	 
 	 float dotNormalRayPos;
 	 XMStoreFloat(&dotNormalRayPos, XMVector3Dot(colNormN, rayPos)); //Colnorm dot raypos
-	 float colDistNumerator = -(d + dotNormalRayPos);
+	 float colDistNumerator = -(D + dotNormalRayPos);
 
 	 // Step 5: Calculate COLDIST and "early out" again if COLDIST is behind RAYDIR
 	 colDist = colDistNumerator / dotNormalRayDir;
