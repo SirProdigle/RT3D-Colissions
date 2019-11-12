@@ -663,24 +663,28 @@ bool HeightMap::RayTriangle(const XMVECTOR& vert0, const XMVECTOR& vert1, const 
 	 // Remember to remove it once you have implemented part 2 below...
 
 	 colNormN = XMVector3Normalize(XMVector3Cross(vert1 - vert0, vert2 - vert0));
+	 XMFLOAT3 planeNormalizedNormal;
+	 XMStoreFloat3(&planeNormalizedNormal, colNormN);
+	 if (abs(planeNormalizedNormal.y) > 0.99f)
+		 return false;
 
 	 // Step 2: Use |COLNORM| and any vertex on the triangle to calculate D
 
-	 float dotNormalPoint; //-D in Ax+By+Cz = -D
-	 XMStoreFloat(&dotNormalPoint, XMVector3Dot(colNormN, vert0));
+	 float d; //-D in Ax+By+Cz = -D
+	 XMStoreFloat(&d, -XMVector3Dot(colNormN, vert0));
 	 
 	 // Step 3: Calculate the demoninator of the COLDIST equation: (|COLNORM| dot |RAYDIR|) and "early out" (return false) if it is 0
-
+	 XMVECTOR normalizedRayDir = XMVector3Normalize(rayDir);
 	 float dotNormalRayDir; //Denominator of final equation for d
-	 XMStoreFloat(&dotNormalRayDir, XMVector3Dot(colNormN, rayDir));
-	 if (dotNormalRayDir < 0)
+	 XMStoreFloat(&dotNormalRayDir, XMVector3Dot(colNormN, normalizedRayDir));
+	 if (dotNormalRayDir == 0)
 		 return false;
 
 	 // Step 4: Calculate the numerator of the COLDIST equation: -(D+(|COLNORM| dot RAYPOS))
 	 
 	 float dotNormalRayPos;
 	 XMStoreFloat(&dotNormalRayPos, XMVector3Dot(colNormN, rayPos)); //Colnorm dot raypos
-	 float colDistNumerator = -(dotNormalPoint + dotNormalRayPos);
+	 float colDistNumerator = -(d + dotNormalRayPos);
 
 	 // Step 5: Calculate COLDIST and "early out" again if COLDIST is behind RAYDIR
 	 colDist = colDistNumerator / dotNormalRayDir;
@@ -688,7 +692,7 @@ bool HeightMap::RayTriangle(const XMVECTOR& vert0, const XMVECTOR& vert1, const 
 
 	 // Step 6: Use COLDIST to calculate COLPOS
 
-	 colPos = rayPos + (colDist * rayDir);
+	 colPos = rayPos + (colDist * normalizedRayDir);
 
 	 // Next two lines are useful debug code to stop collision with anywhere beneath the pyramid. 
 	 //if( min(vert0.y,vert1.y,vert2.y)>colPos.y ) return false;
