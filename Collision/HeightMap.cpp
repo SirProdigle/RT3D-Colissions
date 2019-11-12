@@ -665,8 +665,6 @@ bool HeightMap::RayTriangle(const XMVECTOR& vert0, const XMVECTOR& vert1, const 
 	 colNormN = XMVector3Normalize(XMVector3Cross(vert1 - vert0, vert2 - vert0));
 	 XMFLOAT3 planeNormalizedNormal;
 	 XMStoreFloat3(&planeNormalizedNormal, colNormN);
-	 if (abs(planeNormalizedNormal.y) > 0.99f)
-		 return false;
 
 	 // Step 2: Use |COLNORM| and any vertex on the triangle to calculate D
 
@@ -709,17 +707,31 @@ bool HeightMap::RayTriangle(const XMVECTOR& vert0, const XMVECTOR& vert1, const 
 
 	 // ...
 
-	 // Step 1: Test against plane 1 and return false if behind plane
+	 XMVECTOR planeCross1, planeCross2, planeCross3;
+	 float triangleD1, triangleD2, triangleD3;
+	 float planeDot1, planeDot2, planeDot3;
 
-	 // ...
+	
+	 // Step 1: Test against plane 1 and return false if behind plane
+	 planeCross1 = -XMVector3Cross( vert0 - rayPos,  vert1 - rayPos);
+	 XMStoreFloat(&triangleD1, XMVector3Dot(-planeCross1, rayPos));
+	 XMStoreFloat(&planeDot1, XMVector3Dot(planeCross1, colPos));
+	 if (planeDot1 + triangleD1 < 0)
+		 return false;
 
 	 // Step 2: Test against plane 2 and return false if behind plane
-
-	 // ...
+	 planeCross2 = -XMVector3Cross(vert1 - rayPos,  vert2 - rayPos);
+	 XMStoreFloat(&triangleD2, XMVector3Dot(-planeCross2, rayPos));
+	 XMStoreFloat(&planeDot2, XMVector3Dot(planeCross2, colPos));
+	 if (planeDot2 + triangleD2 < 0)
+		 return false;
 
 	 // Step 3: Test against plane 3 and return false if behind plane
-
-	 // ...
+	 planeCross3 = -XMVector3Cross( vert2 - rayPos,  vert0 - rayPos);
+	 XMStoreFloat(&triangleD3, XMVector3Dot(-planeCross3, rayPos));
+	 XMStoreFloat(&planeDot3, XMVector3Dot(planeCross3, colPos));
+	 if (planeDot3 + triangleD3 < 0)
+		 return false;
 
 	 // Step 4: Return true! (on triangle)
 	 return true;
